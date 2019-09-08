@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29215.179
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrollCode.Nordnet.Console", "TrollCode.Nordnet.Console\TrollCode.Nordnet.Console.csproj", "{BB789A57-57C4-400F-9FFD-38AFB6B39061}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrollCode.Nordnet.API", "TrollCode.Nordnet.API\TrollCode.Nordnet.API.csproj", "{BE80A39C-6198-4F0D-81DF-DC315FA4A5E2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BB789A57-57C4-400F-9FFD-38AFB6B39061}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB789A57-57C4-400F-9FFD-38AFB6B39061}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB789A57-57C4-400F-9FFD-38AFB6B39061}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB789A57-57C4-400F-9FFD-38AFB6B39061}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE80A39C-6198-4F0D-81DF-DC315FA4A5E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE80A39C-6198-4F0D-81DF-DC315FA4A5E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE80A39C-6198-4F0D-81DF-DC315FA4A5E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE80A39C-6198-4F0D-81DF-DC315FA4A5E2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5A1BB8E2-1156-4975-A19D-0337B391505C}
+	EndGlobalSection
+EndGlobal
