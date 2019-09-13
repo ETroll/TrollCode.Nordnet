@@ -20,8 +20,7 @@ namespace TrollCode.Nordnet.API
 {
     public class NordnetApi
     {
-
-        RSACryptoServiceProvider publicKey;
+        readonly RSACryptoServiceProvider publicKey;
         readonly HttpClient client;
 
         public NordnetApi(RSACryptoServiceProvider key, string baseAddress)
@@ -95,55 +94,48 @@ namespace TrollCode.Nordnet.API
 
         }
 
-        public async Task QueryIntruments()
+        public async Task<T> GetData<T>(string uri)
         {
-            HttpResponseMessage response = await client.GetAsync($"/next/2/instruments?query=");
-
+            HttpResponseMessage response = await client.GetAsync(uri);
             string data = await response.Content.ReadAsStringAsync();
 
-            //try
-            //{
-            //    return JsonConvert.DeserializeObject<List<IntrumentListReponse>>(data);
-            //}
-            //catch (Exception)
-            //{
-            //    throw new Exception("Could not deserialize response from Nordnet");
-            //}
-            //throw new Exception("GetMarkets was not successfull", new Exception(response.ReasonPhrase));
+            if (response.IsSuccessStatusCode)
+            {
+                try
+                {
+                    return JsonConvert.DeserializeObject<T>(data);
+                }
+                catch (Exception)
+                {
+                    throw new Exception("Could not deserialize response from Nordnet");
+                }
+            }
+
+            throw new Exception($"Call to {uri} was not successfull", new Exception(response.ReasonPhrase));
+        }
+
+        
+        public async Task QueryIntruments(string query)
+        {
+            HttpResponseMessage response = await client.GetAsync($"/next/2/instruments?query={query}");
+            string data = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Request was not successful. HTTP result: {response.StatusCode} {response.ReasonPhrase}");
+            }
+            Console.WriteLine(data);
+
         }
 
         public async Task<List<IntrumentListReponse>> GetIntrumentLists()
         {
-            HttpResponseMessage response = await client.GetAsync("/next/2/lists");
-
-            string data = await response.Content.ReadAsStringAsync();
-
-            try
-            {
-                return JsonConvert.DeserializeObject<List<IntrumentListReponse>>(data);
-            }
-            catch (Exception)
-            {
-                throw new Exception("Could not deserialize response from Nordnet");
-            }
-            throw new Exception("GetMarkets was not successfull", new Exception(response.ReasonPhrase));
+            return await GetData<List<IntrumentListReponse>>("/next/2/lists");
         }
 
         public async Task<List<MarketResponse>> GetMarkets()
         {
-            HttpResponseMessage response = await client.GetAsync("/next/2/markets");
-
-            string data = await response.Content.ReadAsStringAsync();
-
-            try
-            {
-                return JsonConvert.DeserializeObject<List<MarketResponse>>(data);
-            }
-            catch (Exception)
-            {
-                throw new Exception("Could not deserialize response from Nordnet");
-            }
-            throw new Exception("GetMarkets was not successfull", new Exception(response.ReasonPhrase));
+            return await GetData<List<MarketResponse>>("/next/2/markets");
         }
 
 
