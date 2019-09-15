@@ -1,0 +1,16 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using TrollCode.Nordnet.API.Responses;
+
+namespace TrollCode.Nordnet.API
+{
+    public class NordnetSession
+    {
+        public string SessionId { get; set; }
+        public string Environment { get; set; }
+        public string Country { get; set; }
+        public FeedInformation PrivateFeed { get; set; }
+        public FeedInformation PublicFeed { get; set; }
+    }
+}

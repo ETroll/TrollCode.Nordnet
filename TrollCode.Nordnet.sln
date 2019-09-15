@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29215.179
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrollCode.Nordnet.Console", "TrollCode.Nordnet.Console\TrollCode.Nordnet.Console.csproj", "{BB789A57-57C4-400F-9FFD-38AFB6B39061}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrollCode.Nordnet.DemoApp", "TrollCode.Nordnet.DemoApp\TrollCode.Nordnet.DemoApp.csproj", "{BB789A57-57C4-400F-9FFD-38AFB6B39061}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrollCode.Nordnet.API", "TrollCode.Nordnet.API\TrollCode.Nordnet.API.csproj", "{BE80A39C-6198-4F0D-81DF-DC315FA4A5E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrollCode.Nordnet.API", "TrollCode.Nordnet.API\TrollCode.Nordnet.API.csproj", "{BE80A39C-6198-4F0D-81DF-DC315FA4A5E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
