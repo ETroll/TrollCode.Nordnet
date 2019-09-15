@@ -155,14 +155,14 @@ namespace TrollCode.Nordnet.API
             throw new NotImplementedException();
         }
 
-        public async Task<List<IntrumentListReponse>> GetIntrumentLists()
+        public async Task<List<IntrumentList>> GetIntrumentLists()
         {
-            return await GetData<List<IntrumentListReponse>>("/next/2/lists");
+            return await GetData<List<IntrumentList>>("/next/2/lists");
         }
 
-        public async Task<List<MarketResponse>> GetMarkets()
+        public async Task<List<Market>> GetMarkets()
         {
-            return await GetData<List<MarketResponse>>("/next/2/markets");
+            return await GetData<List<Market>>("/next/2/markets");
         }
 
 

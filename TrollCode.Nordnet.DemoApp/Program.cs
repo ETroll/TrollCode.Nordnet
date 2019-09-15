@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Terminal.Gui;
 using TrollCode.Nordnet.API;
 using TrollCode.Nordnet.API.Responses;
 
-namespace TrollCode.Nordnet
+namespace TrollCode.Nordnet.DemoApp
 {
     class Program
     {
@@ -73,13 +74,15 @@ namespace TrollCode.Nordnet
 
         static async Task Main(string[] args)
         {
+            
+
             try
             {
                 using (NordnetApi nordnet = await LoginAndCreateNordnetContext())
                 {
                     //If no exception was thrown. We are logged in and have a valid session
-
-                    List<IntrumentListReponse> lists = await nordnet.GetIntrumentLists();
+                    nordnet.OnSessionDisconnected += Nordnet_OnSessionDisconnected;
+                    List<IntrumentList> lists = await nordnet.GetIntrumentLists();
                     //await nordnet.GetMarkets();
 
                     Parallel.Invoke(() =>
@@ -88,7 +91,7 @@ namespace TrollCode.Nordnet
                         try
                         {
                             new NordnetFeed().ConnectToFeed(
-                                nordnet.CurrentSession.PublicFeed, 
+                                nordnet.CurrentSession.PublicFeed,
                                 nordnet.CurrentSession.SessionId
                                 );
                         }
@@ -109,6 +112,11 @@ namespace TrollCode.Nordnet
             }
 
             Console.ReadKey();
+        }
+
+        private static void Nordnet_OnSessionDisconnected(object sender, EventArgs e)
+        {
+            Console.WriteLine("Our session was disconnected");
         }
     }
 }
