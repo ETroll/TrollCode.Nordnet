@@ -11,8 +11,15 @@ using Newtonsoft.Json;
 
 namespace TrollCode.Nordnet.API
 {
-    public class NordnetFeed
+    public abstract class NordnetFeed : IObservable<FeedResponse>, IDisposable
     {
+        private readonly List<IObserver<FeedResponse>> observers;
+
+        public NordnetFeed()
+        {
+            observers = new List<IObserver<FeedResponse>>();
+        }
+
         public void ConnectToFeed(FeedInformation information, string sessionid)
         {
             using (TcpClient client = new TcpClient(information.Hostname, information.Port))
@@ -93,6 +100,63 @@ namespace TrollCode.Nordnet.API
                     } while (bytes != 0);
 
                     Console.WriteLine($"The server has disconnected - Stopping");
+                }
+            }
+        }
+
+        private void Notify(FeedResponse message)
+        {
+            foreach (var observer in observers)
+            {
+                if(message == null)
+                {
+                    //TODO: Create own exception?
+                    observer.OnError(new Exception("Null message was recieved"));
+                }
+                else
+                {
+                    observer.OnNext(message);
+                } 
+            }
+        }
+
+        public void Dispose()
+        {
+            foreach (var observer in observers)
+            {
+                if (observers.Contains(observer))
+                {
+                    observer.OnCompleted();
+                }
+            }
+            observers.Clear();
+        }
+
+        public IDisposable Subscribe(IObserver<FeedResponse> observer)
+        {
+            if (!observers.Contains(observer))
+            {
+                observers.Add(observer);
+            }
+            return new FeedUnsubscriber(observers, observer);
+        }
+
+        private class FeedUnsubscriber : IDisposable
+        {
+            private readonly List<IObserver<FeedResponse>> allObservers;
+            private readonly IObserver<FeedResponse> currentObserver;
+
+            public FeedUnsubscriber(List<IObserver<FeedResponse>> allObservers, IObserver<FeedResponse> currentObserver)
+            {
+                this.allObservers = allObservers;
+                this.currentObserver = currentObserver;
+            }
+
+            public void Dispose()
+            {
+                if (currentObserver != null && allObservers.Contains(currentObserver))
+                {
+                    allObservers.Remove(currentObserver);
                 }
             }
         }

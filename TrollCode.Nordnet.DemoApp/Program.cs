@@ -4,8 +4,8 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
-using Terminal.Gui;
 using TrollCode.Nordnet.API;
 using TrollCode.Nordnet.API.Responses;
 
@@ -74,36 +74,48 @@ namespace TrollCode.Nordnet.DemoApp
 
         static async Task Main(string[] args)
         {
-            
-
             try
             {
                 using (NordnetApi nordnet = await LoginAndCreateNordnetContext())
                 {
                     //If no exception was thrown. We are logged in and have a valid session
                     nordnet.OnSessionDisconnected += Nordnet_OnSessionDisconnected;
-                    List<IntrumentList> lists = await nordnet.GetIntrumentLists();
+                    //List<IntrumentList> lists = await nordnet.GetIntrumentLists();
                     //await nordnet.GetMarkets();
 
-                    Parallel.Invoke(() =>
-                    {
-                        Console.WriteLine("Setting up private feed");
-                        try
-                        {
-                            new NordnetFeed().ConnectToFeed(
-                                nordnet.CurrentSession.PublicFeed,
-                                nordnet.CurrentSession.SessionId
-                                );
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Error: {ex.Message}");
-                        }
-                    }, () =>
-                    {
-                        Console.WriteLine("Setting up public feed");
-                        //NordnetFeed publicFeed = new NordnetFeed(nordnet.CurrentSession);
-                    });
+                    //var status = await nordnet.GetSystemStatus();
+                    var accounts = await nordnet.GetAccounts();
+                    //var accountinfo = await nordnet.GetAccountInfo(accounts[0].Accno);
+                    //var ledgerinfo = await nordnet.GetLedgerInformationForAccount(accounts[0].Accno);
+                    var orders = await nordnet.GetOrdersForAccount(accounts[0].Accno);
+                    //var orderresult = await nordnet.PostOrder(accounts[0].Accno, new SendOrder());
+
+                    //foreach(var list in (await nordnet.GetIntrumentLists()).Take(5))
+                    //{
+                    //    var instruments = await nordnet.GetInstrumentsInList(list.List_id);
+                    //}
+
+                    //Parallel.Invoke(() =>
+                    //{
+                    //    Console.WriteLine("Setting up private feed");
+                    //    try
+                    //    {
+                    //        new NordnetFeed().ConnectToFeed(
+                    //            nordnet.CurrentSession.PublicFeed,
+                    //            nordnet.CurrentSession.SessionId
+                    //            );
+                    //    }
+                    //    catch (Exception ex)
+                    //    {
+                    //        Console.WriteLine($"Error: {ex.Message}");
+                    //    }
+                    //}, () =>
+                    //{
+                    //    Console.WriteLine("Setting up public feed");
+                    //    //NordnetFeed publicFeed = new NordnetFeed(nordnet.CurrentSession);
+                    //});
+
+                    Console.WriteLine("Just for debug stop");
                 }
             }
             catch (Exception exp)

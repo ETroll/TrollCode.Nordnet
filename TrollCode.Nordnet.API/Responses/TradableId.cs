@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace TrollCode.Nordnet.API.Responses
+{
+    /*
+     TradableId {
+        identifier (string): The Nordnet tradable identifier,
+        market_id (integer): The Nordnet market_id
+        }
+     */
+    public class TradableId
+    {
+        public string Identifier { get; set; }
+        public int Market_id { get; set; }
+    }
+}

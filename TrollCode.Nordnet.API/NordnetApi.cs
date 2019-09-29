@@ -132,9 +132,9 @@ namespace TrollCode.Nordnet.API
                 {
                     return JsonConvert.DeserializeObject<T>(data);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    throw new Exception("Could not deserialize response from Nordnet");
+                    throw new Exception($"Could not deserialize response from Nordnet: {ex.Message}");
                 }
             }
             throw new Exception($"Call to {response.RequestMessage.RequestUri} was not successfull", new Exception(response.ReasonPhrase));
@@ -160,10 +160,64 @@ namespace TrollCode.Nordnet.API
             return await GetData<List<IntrumentList>>("/next/2/lists");
         }
 
+        public async Task<List<Instrument>> GetInstrumentsInList(int listId)
+        {
+            return await GetData<List<Instrument>>($"/next/2/lists/{listId}");
+        }
+
         public async Task<List<Market>> GetMarkets()
         {
             return await GetData<List<Market>>("/next/2/markets");
         }
+
+        public async Task<SystemStatus> GetSystemStatus()
+        {
+            return await GetData<SystemStatus>("/next/2");
+        }
+
+        public async Task<List<Account>> GetAccounts()
+        {
+            return await GetData<List<Account>>("/next/2/accounts");
+        }
+
+        public async Task<AccountInfo> GetAccountInfo(int accountno)
+        {
+            return await GetData<AccountInfo>($"/next/2/accounts/{accountno}");
+        }
+
+        public async Task<LedgerInformation> GetLedgerInformationForAccount(int accountno)
+        {
+            return await GetData<LedgerInformation>($"/next/2/accounts/{accountno}/ledgers");
+        }
+
+        public async Task<List<Order>> GetOrdersForAccount(int accountno, bool includeDeleted = false)
+        {
+            return await GetData<List<Order>>($"/next/2/accounts/{accountno}/orders{(includeDeleted ? "?deleted=true" : string.Empty)}");
+        }
+
+        public async Task<OrderReply> PostOrder(int accountno, SendOrder order)
+        {
+            /*
+                {"i", "1869" },
+                {"m", "14"}
+             */
+            using (HttpContent content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                {"identifier", "1501855"},
+                {"market_id", "30"},
+                {"volume", "10"},
+                {"side", "BUY"},
+                {"price", "2" },
+                {"currency", "SEK" }
+            }))
+            {
+                HttpResponseMessage orderResult = await client.PostAsync($"/next/2/accounts/{accountno}/orders", content);
+
+                return await ParseResponse<OrderReply>(orderResult);
+            };
+        }
+
+
 
 
         public void Dispose()
