@@ -122,6 +122,12 @@ namespace TrollCode.Nordnet.API
 
         public void Dispose()
         {
+            Dispose(true);
+            //Just in case an inherited class adds a finalizer
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
             foreach (var observer in observers)
             {
                 if (observers.Contains(observer))

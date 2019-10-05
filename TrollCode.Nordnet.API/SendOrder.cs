@@ -10,10 +10,10 @@ namespace TrollCode.Nordnet.API
         /// Enter a new order, market_id + identifier is the identifier of the tradable.
         /// </summary>
         public string Identifier { get; set; }
-        public int Market_id { get; set; }
+        public long Market_id { get; set; }
         public decimal Price { get; set; }
         public string Currency { get; set; }
-        public int Volume { get; set; }
+        public long Volume { get; set; }
         public OrderSideType Side { get; set; }
         public OrderType Order_type { get; set; }
         /// <summary>
@@ -25,7 +25,7 @@ namespace TrollCode.Nordnet.API
         /// The visible part of an iceberg order. If left out the whole volume of the order is 
         /// visible on the market. This field is only allowed if the order type is LIMIT or NORMAL
         /// </summary>
-        public int Open_volume { get; set; }
+        public long Open_volume { get; set; }
         /// <summary>
         /// Free text reference for the order. Intended for the end user
         /// </summary>

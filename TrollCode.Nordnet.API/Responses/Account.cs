@@ -17,7 +17,7 @@ namespace TrollCode.Nordnet.API.Responses
      */
     public class Account
     {
-        public int Accno { get; set; }
+        public long Accno { get; set; }
         public string Type { get; set; }
         public bool Default { get; set; }
         public string Alias { get; set; }

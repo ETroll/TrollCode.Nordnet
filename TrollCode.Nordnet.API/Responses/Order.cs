@@ -49,8 +49,8 @@ namespace TrollCode.Nordnet.API.Responses
      */
     public class Order
     {
-        public int Accno { get; set; }
-        public int Order_id { get; set; }
+        public long Accno { get; set; }
+        public long Order_id { get; set; }
         public Amount Price { get; set; }
         public decimal Volume { get; set; }
         public TradableId Tradable { get; set; }
