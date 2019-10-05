@@ -15,10 +15,10 @@ namespace TrollCode.Nordnet.API.Responses
      */
     public class Tradable
     {
-        public int Market_id { get; set; }
+        public long Market_id { get; set; }
         public string Identifier { get; set; }
-        public int Tick_size_id { get; set; }
+        public long Tick_size_id { get; set; }
         public decimal Lot_size { get; set; }
-        public int Display_order { get; set; }
+        public long Display_order { get; set; }
     }
 }

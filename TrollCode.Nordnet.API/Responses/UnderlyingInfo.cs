@@ -13,7 +13,7 @@ namespace TrollCode.Nordnet.API.Responses
      */
     public class UnderlyingInfo
     {
-        public int Instrument_id { get; set; }
+        public long Instrument_id { get; set; }
         public string Symbol { get; set; }
         public string Isin_code { get; set; }
     }

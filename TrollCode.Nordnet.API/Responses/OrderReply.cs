@@ -15,7 +15,7 @@ namespace TrollCode.Nordnet.API.Responses
     */
     public class OrderReply
     {
-        public int Order_id { get; set; }
+        public long Order_id { get; set; }
         public string Result_code { get; set; }
         public string Order_state { get; set; }
         public string Action_state { get; set; }

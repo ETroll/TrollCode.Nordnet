@@ -13,6 +13,6 @@ namespace TrollCode.Nordnet.API.Responses
     public class TradableId
     {
         public string Identifier { get; set; }
-        public int Market_id { get; set; }
+        public long Market_id { get; set; }
     }
 }

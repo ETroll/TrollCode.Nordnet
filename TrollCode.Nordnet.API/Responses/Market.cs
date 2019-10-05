@@ -6,7 +6,7 @@ namespace TrollCode.Nordnet.API.Responses
 {
     public class Market
     {
-        public int Market_id { get; set; }
+        public long Market_id { get; set; }
         public string Country { get; set; }
         public bool Is_virtual { get; set; }
         public string Name { get; set; }

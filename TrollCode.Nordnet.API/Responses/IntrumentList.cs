@@ -16,8 +16,8 @@ namespace TrollCode.Nordnet.API.Responses
         // }
 
         public string Symbol { get; set; }
-        public int Display_order { get; set; }
-        public int List_id { get; set; }
+        public long Display_order { get; set; }
+        public long List_id { get; set; }
         public string Name { get; set; }
         public string Country { get; set; }
         public string Region { get; set; }
