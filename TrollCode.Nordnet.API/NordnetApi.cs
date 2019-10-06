@@ -12,7 +12,6 @@ using TrollCode.Nordnet.API.Responses;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Linq;
-
 namespace TrollCode.Nordnet.API
 {
     public class NordnetApi : IDisposable
@@ -141,23 +140,7 @@ namespace TrollCode.Nordnet.API
             throw new Exception($"Call to {response.RequestMessage.RequestUri} was not successfull", new Exception(response.ReasonPhrase));
         }
 
-        
-
-
-        public async Task<List<IntrumentList>> GetIntrumentLists()
-        {
-            return await GetData<List<IntrumentList>>("/next/2/lists");
-        }
-
-        public async Task<List<Instrument>> GetInstrumentsInList(long listId)
-        {
-            return await GetData<List<Instrument>>($"/next/2/lists/{listId}");
-        }
-
-        public async Task<List<Market>> GetMarkets()
-        {
-            return await GetData<List<Market>>("/next/2/markets");
-        }
+      
 
         #region System Queries
         public async Task<SystemStatus> GetSystemStatus()
@@ -327,15 +310,289 @@ namespace TrollCode.Nordnet.API
             return await GetData<Instrument>($"/next/2/instruments/{instrumentId}");
         }
 
-        public async Task<List<Instrument>> GetLeveratesForInstrument(long instrumentId, )
+        public async Task<List<Instrument>> GetLeveragesForInstrument(long instrumentId, DateTime? expirationDate = null, long issuerId = 0, char? marketView = null, string instrumentType = null, string instrumentGroupType = null, string currency = null)
         {
+            //TODO: Check out market view, this can be a enum instead of char D or U. (See docs)
             List<Tuple<string,string>> queryParameters = new List<Tuple<string, string>>();
 
-            //queryParameters.
+            if(expirationDate.HasValue)
+            {
+                //Format: 2014-07-08
+                queryParameters.Add(new Tuple<string, string>("expiration_date", expirationDate.Value.ToString("yyyy-MM-dd")));
+            }
+
+            if (issuerId > 0)
+            {
+                queryParameters.Add(new Tuple<string, string>("issuer_Id", issuerId.ToString()));
+            }
+
+            if (marketView.HasValue)
+            {
+                queryParameters.Add(new Tuple<string, string>("market_view", marketView.ToString()));
+            }
+
+            if (!string.IsNullOrWhiteSpace(instrumentType))
+            {
+                queryParameters.Add(new Tuple<string, string>("instrument_type", instrumentType));
+            }
+
+            if (!string.IsNullOrWhiteSpace(instrumentGroupType))
+            {
+                queryParameters.Add(new Tuple<string, string>("instrument_group_type", instrumentGroupType));
+            }
+
+            if (!string.IsNullOrWhiteSpace(currency))
+            {
+                queryParameters.Add(new Tuple<string, string>("currency", currency));
+            }
 
             return await GetData<List<Instrument>>($"/next/2/instruments/{instrumentId}/leverages{(queryParameters.Count() > 0 ? "?" + string.Join(",", queryParameters.Select(x => $"{x.Item1}={x.Item2}")) : string.Empty)}");
         }
 
+        public async Task<List<LeverageFilter>> GetLeverageFiltersForInstrument(long instrumentId, DateTime? expirationDate = null, long issuerId = 0, char? marketView = null, string instrumentType = null, string instrumentGroupType = null, string currency = null)
+        {
+            List<Tuple<string, string>> queryParameters = new List<Tuple<string, string>>();
+
+            if (expirationDate.HasValue)
+            {
+                queryParameters.Add(new Tuple<string, string>("expiration_date", expirationDate.Value.ToString("yyyy-MM-dd")));
+            }
+
+            if (issuerId > 0)
+            {
+                queryParameters.Add(new Tuple<string, string>("issuer_Id", issuerId.ToString()));
+            }
+
+            if (marketView.HasValue)
+            {
+                queryParameters.Add(new Tuple<string, string>("market_view", marketView.ToString()));
+            }
+
+            if (!string.IsNullOrWhiteSpace(instrumentType))
+            {
+                queryParameters.Add(new Tuple<string, string>("instrument_type", instrumentType));
+            }
+
+            if (!string.IsNullOrWhiteSpace(instrumentGroupType))
+            {
+                queryParameters.Add(new Tuple<string, string>("instrument_group_type", instrumentGroupType));
+            }
+
+            if (!string.IsNullOrWhiteSpace(currency))
+            {
+                queryParameters.Add(new Tuple<string, string>("currency", currency));
+            }
+
+            return await GetData<List<LeverageFilter>>($"/next/2/instruments/{instrumentId}/leverages/filters{(queryParameters.Count() > 0 ? "?" + string.Join("&", queryParameters.Select(x => $"{x.Item1}={x.Item2}")) : string.Empty)}");
+        }
+
+        /// <summary>
+        /// Returns a list of call/put option pairs. They are balanced on strike price. In order to find underlyings with options use "Get underlyings". To get available expiration dates use "Get option pair filters"
+        /// </summary>
+        /// <param name="instrumentId">The instrument id of the underlying instrument	</param>
+        /// <param name="expirationDate">Show only option pairs instruments with a specific expiration date	</param>
+        /// <returns>A list of call/put option pairs</returns>
+        public async Task<List<OptionPair>> GetOptionPairsForInstrument(long instrumentId, DateTime? expirationDate = null)
+        {
+            return await GetData<List<OptionPair>>($"/next/2/instruments/{instrumentId}/option_pairs{(expirationDate.HasValue ? "?expiration_date="+ expirationDate.Value.ToString("yyyy-MM-dd") : string.Empty)}");
+        }
+
+        /// <summary>
+        /// Returns valid filter values. Can be used to fill comboboxes in clients to filter options pair results. The same filters can be applied on this request to exclude invalid filter combinations
+        /// </summary>
+        /// <param name="instrumentId">The instrument id of the underlying instrument</param>
+        /// <param name="expirationDate">Show only leverage instruments with a specific expiration date	</param>
+        /// <returns>A optionfilter containing a list of valid expiration dates</returns>
+        public async Task<OptionPairFilter> GetOptionPairFiltersForInstrument(long instrumentId, DateTime? expirationDate = null)
+        {
+            return await GetData<OptionPairFilter>($"/next/2/instruments/{instrumentId}/option_pairs/filters{(expirationDate.HasValue ? "?expiration_date=" + expirationDate.Value.ToString("yyyy-MM-dd") : string.Empty)}");
+        }
+
+        /// <summary>
+        /// Lookup specfic instrument with prededfined fields. Please note that this is not a search, only exact matches is returned.
+        /// </summary>
+        /// <param name="marketId">The marked to lookup the instrument in</param>
+        /// <param name="idenifier">The identifier for the instrument to look up</param>
+        /// <returns>A instrument or null if nothing was found</returns>
+        public async Task<Instrument> LookupUpInstrument(long marketId, long idenifier)
+        {
+            if (idenifier <= 0 || marketId <= 0)
+            {
+                throw new ArgumentException("All paramters have to contain a value larger than zero");
+            }
+            return await GetData<Instrument>($"/next/2/instruments/lookup/market_id_identifier/{marketId}:{idenifier}");
+        }
+
+        /// <summary>
+        /// Lookup specfic instrument with prededfined fields. Please note that this is not a search, only exact matches is returned.
+        /// </summary>
+        /// <param name="isin">The instrument ISIN</param>
+        /// <param name="currency">The instrument Currency</param>
+        /// <param name="marketId">The marked to lookup the instrument in</param>
+        /// <returns>A instrument or null if nothing was found</returns>
+        public async Task<Instrument> LookupUpInstrumentByISIN(string isin, string currency, long marketId)
+        {
+            if(string.IsNullOrWhiteSpace(isin) || string.IsNullOrWhiteSpace(currency) || marketId <= 0)
+            {
+                throw new ArgumentException("All paramters have to contain a value");
+            }
+            return await GetData<Instrument>($"/next/2/instruments/lookup/isin_code_currency_market_id/{isin}:{currency}:{marketId}");
+        }
+
+        /// <summary>
+        /// Get all instrument sectors
+        /// </summary>
+        /// <param name="group">Filter result on specified groups</param>
+        /// <returns>A list of the available sectors</returns>
+        public async Task<List<SectorType>> GetAllInstrumentSectors(string group = null)
+        {
+            return await GetData<List<SectorType>>($"/next/2/instruments/sectors{(!string.IsNullOrEmpty(group) ? "?group=" + group : string.Empty)}");
+        }
+
+        /// <summary>
+        /// Get one or more sector
+        /// </summary>
+        /// <param name="sectors">Array of sectors you want information for</param>
+        /// <returns>A list of sectors with information</returns>
+        public async Task<List<SectorType>> GetSectorInformation(string[] sectors)
+        {
+            return await GetData<List<SectorType>>($"/next/2/instruments/sectors/{string.Join(",", sectors)}");
+        }
+
+        /// <summary>
+        /// Get all instrument types. Please note that these types is used for both instrument_type and instrument_group_type.
+        /// </summary>
+        /// <returns>A list of all instrument types available</returns>
+        public async Task<List<InstrumentType>> GetAllInstrumentTypes()
+        {
+            return await GetData<List<InstrumentType>>($"/next/2/instruments/types");
+        }
+
+        /// <summary>
+        /// Get info of one orde more instrument type.
+        /// </summary>
+        /// <param name="instrumentTypes">The instrument types to get information on</param>
+        /// <returns>A list of all instrument types</returns>
+        public async Task<List<InstrumentType>> GetInstrumentTypes(string[] instrumentTypes)
+        {
+            return await GetData<List<InstrumentType>>($"/next/2/instruments/types/{string.Join(",", instrumentTypes)}");
+        }
+
+        /// <summary>
+        /// Get instruments that are underlyings for a specific type of instruments. The query can return instrument that have option derivatives or leverage derivatives. Warrants are included in the leverage derivatives
+        /// </summary>
+        /// <param name="currency">The currency of the derivative. Please note that the underlying can have a different currency	</param>
+        /// <returns></returns>
+        public async Task<List<Instrument>> GetUnderlyingInstrumentsForLeverageDerivative(string currency)
+        {
+            if(string.IsNullOrWhiteSpace(currency))
+            {
+                throw new ArgumentException("A currency is needed");
+            }
+
+            return await GetData<List<Instrument>>($"/next/2/instruments/underlyings/leverage/{currency}");
+        }
+
+        /// <summary>
+        /// Get instruments that are underlyings for a specific type of instruments. The query can return instrument that have option derivatives or leverage derivatives. Warrants are included in the leverage derivatives
+        /// </summary>
+        /// <param name="currency">The currency of the derivative. Please note that the underlying can have a different currency	</param>
+        /// <returns></returns>
+        public async Task<List<Instrument>> GetUnderlyingInstrumentsForOptionPairDerivative(string currency)
+        {
+            if (string.IsNullOrWhiteSpace(currency))
+            {
+                throw new ArgumentException("A currency is needed");
+            }
+
+            return await GetData<List<Instrument>>($"/next/2/instruments/underlyings/option_pair/{currency}");
+        }
+
+        #endregion
+
+
+        #region Instrument List Queries
+        public async Task<List<IntrumentList>> GetIntrumentLists()
+        {
+            return await GetData<List<IntrumentList>>("/next/2/lists");
+        }
+
+        public async Task<List<Instrument>> GetInstrumentsInList(long listId)
+        {
+            if (listId <= 0)
+            {
+                throw new ArgumentException("A valid listId with value of 0 or more is required");
+            }
+
+            return await GetData<List<Instrument>>($"/next/2/lists/{listId}");
+        }
+        #endregion
+
+        #region Market Queries
+
+        public async Task<List<Market>> GetAllMarkets()
+        {
+            return await GetData<List<Market>>("/next/2/markets");
+        }
+
+        public async Task<List<Market>> GetMarkets(long[] marketIds)
+        {
+            return await GetData<List<Market>>($"/next/2/markets/{string.Join(",", marketIds.Select(x => x.ToString()))}");
+        }
+
+        #endregion
+
+        #region News Queries
+
+        public async Task<List<NewsPreview>> GetNews(string query = null, long[] instrumentIds = null, int days = 0, string[] newsLangs = null, string[] newsCountries = null, long[] marketIds = null, int limit = 100, int offset = 0, long[] sourceIds = null)
+        {
+            List<Tuple<string, string>> queryParameters = new List<Tuple<string, string>>();
+
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                queryParameters.Add(new Tuple<string, string>("query", query));
+            }
+            if (instrumentIds != null && instrumentIds.Length > 0)
+            {
+                queryParameters.Add(new Tuple<string, string>("instrument_id", string.Join(",", instrumentIds.Select(x => x.ToString()))));
+            }
+            if (days > 0)
+            {
+                queryParameters.Add(new Tuple<string, string>("days", days.ToString()));
+            }
+            if (newsLangs != null && newsLangs.Length > 0)
+            {
+                queryParameters.Add(new Tuple<string, string>("news_lang", string.Join(",", newsLangs)));
+            }
+            if (newsCountries != null && newsCountries.Length > 0)
+            {
+                queryParameters.Add(new Tuple<string, string>("news_country", string.Join(",", newsCountries)));
+            }
+            if (marketIds != null && marketIds.Length > 0)
+            {
+                queryParameters.Add(new Tuple<string, string>("market_id", string.Join(",", marketIds.Select(x => x.ToString()))));
+            }
+            if (limit > 0)
+            {
+                if(limit > 100)
+                {
+                    throw new ArgumentException("Limit can not be larger than the max value of 100");
+                }
+                queryParameters.Add(new Tuple<string, string>("limit", limit.ToString()));
+            }
+
+            if (offset >= 0)
+            {
+                queryParameters.Add(new Tuple<string, string>("offset", offset.ToString()));
+            }
+
+            if (sourceIds != null && sourceIds.Length > 0)
+            {
+                queryParameters.Add(new Tuple<string, string>("source_id", string.Join(",", sourceIds.Select(x => x.ToString()))));
+            }
+
+            return await GetData<List<NewsPreview>>($"/next/2/news{(queryParameters.Count() > 0 ? "?" + string.Join("&", queryParameters.Select(x => $"{x.Item1}={x.Item2}")) : string.Empty)}");
+        }
 
         #endregion
 

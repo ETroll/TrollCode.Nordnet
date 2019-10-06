@@ -80,8 +80,43 @@ namespace TrollCode.Nordnet.DemoApp
                 {
                     //If no exception was thrown. We are logged in and have a valid session
                     nordnet.OnSessionDisconnected += Nordnet_OnSessionDisconnected;
-                    //List<IntrumentList> lists = await nordnet.GetIntrumentLists();
+                    
+                    List<IntrumentList> lists = await nordnet.GetIntrumentLists();
+
+                    // Mid cap oslo list:  16384830  16314769
+                    // Large cap Oslo: 16384829
+                    // Small cap Oslo: 16384831
+
+                    //List<Instrument> instruments_no = await nordnet.GetInstrumentsInList(16384831);
+                    //List<Instrument> instruments_dk = await nordnet.GetInstrumentsInList(16314769);
+
+
                     //await nordnet.GetMarkets();
+
+                    //foreach (var instrument in instruments_dk)
+                    //{
+                    //    //2014-06-20
+                    //    List<OptionPair> optionPair = await nordnet.GetOptionPairsForInstrument(instrument.Instrument_id);
+                    //    if ((optionPair?.Count() ?? 0) > 0)
+                    //    {
+                    //        Console.WriteLine("");
+                    //    }
+                    //    await Task.Delay(250);
+                    //}
+
+                    //var sectors = await nordnet.GetAllInstrumentSectors("FINANCIAL");
+                    //var instrumentTypes = await nordnet.GetAllInstrumentTypes();
+
+
+
+                    var news = await nordnet.GetNews();
+
+
+
+
+
+
+
 
                     //var status = await nordnet.GetSystemStatus();
                     var accounts = await nordnet.GetAccounts();
@@ -90,30 +125,10 @@ namespace TrollCode.Nordnet.DemoApp
                     var orders = await nordnet.GetOrdersForAccount(accounts[0].Accno);
                     //var orderresult = await nordnet.PostOrder(accounts[0].Accno, new SendOrder());
 
-                    //foreach(var list in (await nordnet.GetIntrumentLists()).Take(5))
-                    //{
-                    //    var instruments = await nordnet.GetInstrumentsInList(list.List_id);
-                    //}
 
-                    //Parallel.Invoke(() =>
-                    //{
-                    //    Console.WriteLine("Setting up private feed");
-                    //    try
-                    //    {
-                    //        new NordnetFeed().ConnectToFeed(
-                    //            nordnet.CurrentSession.PublicFeed,
-                    //            nordnet.CurrentSession.SessionId
-                    //            );
-                    //    }
-                    //    catch (Exception ex)
-                    //    {
-                    //        Console.WriteLine($"Error: {ex.Message}");
-                    //    }
-                    //}, () =>
-                    //{
-                    //    Console.WriteLine("Setting up public feed");
-                    //    //NordnetFeed publicFeed = new NordnetFeed(nordnet.CurrentSession);
-                    //});
+
+
+
 
                     Console.WriteLine("Just for debug stop");
                 }
