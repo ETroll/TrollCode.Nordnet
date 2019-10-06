@@ -22,7 +22,7 @@ namespace TrollCode.Nordnet.API
 
         public void ConnectToFeed(FeedInformation information, string sessionid)
         {
-            using (TcpClient client = new TcpClient(information.Hostname, information.Port))
+            using (TcpClient client = new TcpClient(information.Hostname, (int)information.Port))
             {
                 Console.WriteLine("Client connected.");
 
