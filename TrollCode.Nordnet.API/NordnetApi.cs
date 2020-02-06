@@ -12,6 +12,8 @@ using TrollCode.Nordnet.API.Responses;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Linq;
+using System.Web;
+
 namespace TrollCode.Nordnet.API
 {
     public class NordnetApi : IDisposable
@@ -254,7 +256,7 @@ namespace TrollCode.Nordnet.API
         }
         public async Task<List<CountryInformation>> GetInformationForCountryCodes(string[] countryCodes)
         {
-            return await GetData<List<CountryInformation>>($"/next/2/countries/{string.Join(",",countryCodes)}");
+            return await GetData<List<CountryInformation>>($"/next/2/countries/{HttpUtility.UrlEncode(string.Join(",",countryCodes))}");
         }
         public async Task<CountryInformation> GetInformationForCountryCode(string countryCode)
         {
@@ -274,7 +276,7 @@ namespace TrollCode.Nordnet.API
         /// <returns>Indicator information</returns>
         public async Task<List<Indicator>> GetInformationForIndicators(Tuple<string, string>[] indicators)
         {
-            return await GetData<List<Indicator>>($"/next/2/indicators/{string.Join(",", indicators.Select(x => $"{x.Item1}:{x.Item2}"))}");
+            return await GetData<List<Indicator>>($"/next/2/indicators/{HttpUtility.UrlEncode(string.Join(",", indicators.Select(x => $"{x.Item1}:{x.Item2}")))}");
         }
         /// <summary>
         /// Returns full information for indicator if found
@@ -303,7 +305,7 @@ namespace TrollCode.Nordnet.API
 
         public async Task<List<Instrument>> GetInstrumentsForIds(long[] instrumentIds)
         {
-            return await GetData<List<Instrument>>($"/next/2/instruments/{string.Join(",", instrumentIds.Select(x => x.ToString()))}");
+            return await GetData<List<Instrument>>($"/next/2/instruments/{HttpUtility.UrlEncode(string.Join(",", instrumentIds.Select(x => x.ToString())))}");
         }
         public async Task<Instrument> GetInstrumentForId(long instrumentId)
         {
@@ -346,7 +348,7 @@ namespace TrollCode.Nordnet.API
                 queryParameters.Add(new Tuple<string, string>("currency", currency));
             }
 
-            return await GetData<List<Instrument>>($"/next/2/instruments/{instrumentId}/leverages{(queryParameters.Count() > 0 ? "?" + string.Join(",", queryParameters.Select(x => $"{x.Item1}={x.Item2}")) : string.Empty)}");
+            return await GetData<List<Instrument>>($"/next/2/instruments/{instrumentId}/leverages{(queryParameters.Count() > 0 ? "?" + string.Join("&", queryParameters.Select(x => $"{x.Item1}={x.Item2}")) : string.Empty)}");
         }
 
         public async Task<List<LeverageFilter>> GetLeverageFiltersForInstrument(long instrumentId, DateTime? expirationDate = null, long issuerId = 0, char? marketView = null, string instrumentType = null, string instrumentGroupType = null, string currency = null)
@@ -456,7 +458,7 @@ namespace TrollCode.Nordnet.API
         /// <returns>A list of sectors with information</returns>
         public async Task<List<SectorType>> GetSectorInformation(string[] sectors)
         {
-            return await GetData<List<SectorType>>($"/next/2/instruments/sectors/{string.Join(",", sectors)}");
+            return await GetData<List<SectorType>>($"/next/2/instruments/sectors/{HttpUtility.UrlEncode(string.Join(",", sectors))}");
         }
 
         /// <summary>
@@ -475,7 +477,7 @@ namespace TrollCode.Nordnet.API
         /// <returns>A list of all instrument types</returns>
         public async Task<List<InstrumentType>> GetInstrumentTypes(string[] instrumentTypes)
         {
-            return await GetData<List<InstrumentType>>($"/next/2/instruments/types/{string.Join(",", instrumentTypes)}");
+            return await GetData<List<InstrumentType>>($"/next/2/instruments/types/{HttpUtility.UrlEncode(string.Join(",", instrumentTypes))}");
         }
 
         /// <summary>
@@ -510,7 +512,6 @@ namespace TrollCode.Nordnet.API
 
         #endregion
 
-
         #region Instrument List Queries
         public async Task<List<IntrumentList>> GetIntrumentLists()
         {
@@ -537,7 +538,7 @@ namespace TrollCode.Nordnet.API
 
         public async Task<List<Market>> GetMarkets(long[] marketIds)
         {
-            return await GetData<List<Market>>($"/next/2/markets/{string.Join(",", marketIds.Select(x => x.ToString()))}");
+            return await GetData<List<Market>>($"/next/2/markets/{HttpUtility.UrlEncode(string.Join(",", marketIds.Select(x => x.ToString())))}");
         }
 
         #endregion
@@ -591,7 +592,22 @@ namespace TrollCode.Nordnet.API
                 queryParameters.Add(new Tuple<string, string>("source_id", string.Join(",", sourceIds.Select(x => x.ToString()))));
             }
 
-            return await GetData<List<NewsPreview>>($"/next/2/news{(queryParameters.Count() > 0 ? "?" + string.Join("&", queryParameters.Select(x => $"{x.Item1}={x.Item2}")) : string.Empty)}");
+            return await GetData<List<NewsPreview>>($"/next/2/news{(queryParameters.Count() > 0 ? "?" + string.Join("&", queryParameters.Select(x => $"{x.Item1}={HttpUtility.UrlEncode(x.Item2)}")) : string.Empty)}");
+        }
+
+        public async Task<NewsItem> GetNewsItem(long itemId)
+        {
+            return (await GetNewsItems(new long[] { itemId })).FirstOrDefault();
+        }
+
+        public async Task<List<NewsItem>> GetNewsItems(long[] itemIds)
+        {
+            return await GetData<List<NewsItem>>($"/next/2/news/{HttpUtility.UrlEncode(string.Join(",", itemIds.Select(x => x.ToString())))}");
+        }
+
+        public async Task<List<NewsSource>> GetNewsSources()
+        {
+            return await GetData<List<NewsSource>>("/next/2/news_sources");
         }
 
         #endregion
