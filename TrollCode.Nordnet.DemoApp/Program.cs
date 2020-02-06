@@ -52,6 +52,11 @@ namespace TrollCode.Nordnet.DemoApp
                     string usernameUri = configuration.GetSection("DemoSettings:NordnetUsername").Value;
                     string passwordUri = configuration.GetSection("DemoSettings:NordnetPassword").Value;
 
+                    if(string.IsNullOrWhiteSpace(usernameUri) || string.IsNullOrWhiteSpace(passwordUri))
+                    {
+                        throw new Exception("Could find any KeyVault URI's in config. Please add DemoSettings:NordnetUsername and DemoSettings:NordnetPassword to appsetting.json");
+                    }
+
                     var keyVaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
 
 
