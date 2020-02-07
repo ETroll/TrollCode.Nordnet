@@ -54,7 +54,7 @@ namespace TrollCode.Nordnet.API
 
             return provider;
         }
-        
+
         public async Task Login(string username, string password)
         {
             string timestamp = Math.Round((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalMilliseconds)
@@ -112,7 +112,7 @@ namespace TrollCode.Nordnet.API
         private async void KeepAliveTick(object state)
         {
             LoggedInStatus status = await ParseResponse<LoggedInStatus>(await client.PutAsync("next/2/login", new StringContent(string.Empty)));
-            if(!status.Logged_in)
+            if (!status.Logged_in)
             {
                 OnSessionDisconnected?.Invoke(this, null);
                 keepAliveTimer.Dispose();
@@ -142,7 +142,7 @@ namespace TrollCode.Nordnet.API
             throw new Exception($"Call to {response.RequestMessage.RequestUri} was not successfull", new Exception(response.ReasonPhrase));
         }
 
-      
+
 
         #region System Queries
         public async Task<SystemStatus> GetSystemStatus()
@@ -209,9 +209,9 @@ namespace TrollCode.Nordnet.API
         public async Task<OrderReply> UpdateOrder(long accountno, long orderid, long newVolume = 0, decimal newPrice = 0, string newCurrency = null)
         {
             string queryParameters = string.Empty;
-            if(newPrice > 0)
+            if (newPrice > 0)
             {
-                if(string.IsNullOrWhiteSpace(newCurrency))
+                if (string.IsNullOrWhiteSpace(newCurrency))
                 {
                     //TODO: Validate against known currencies?
                     throw new ArgumentException("Currency can not be empty if a new price is set");
@@ -224,7 +224,7 @@ namespace TrollCode.Nordnet.API
                 queryParameters += $"{(string.IsNullOrWhiteSpace(queryParameters) ? string.Empty : "&")}volume={newVolume}";
             }
 
-            if(!string.IsNullOrWhiteSpace(queryParameters))
+            if (!string.IsNullOrWhiteSpace(queryParameters))
             {
                 HttpResponseMessage orderResult = await client.PutAsync($"/next/2/accounts/{accountno}/orders/{orderid}?{queryParameters}", new StringContent(string.Empty));
                 return await ParseResponse<OrderReply>(orderResult);
@@ -256,7 +256,7 @@ namespace TrollCode.Nordnet.API
         }
         public async Task<List<CountryInformation>> GetInformationForCountryCodes(string[] countryCodes)
         {
-            return await GetData<List<CountryInformation>>($"/next/2/countries/{HttpUtility.UrlEncode(string.Join(",",countryCodes))}");
+            return await GetData<List<CountryInformation>>($"/next/2/countries/{HttpUtility.UrlEncode(string.Join(",", countryCodes))}");
         }
         public async Task<CountryInformation> GetInformationForCountryCode(string countryCode)
         {
@@ -290,7 +290,7 @@ namespace TrollCode.Nordnet.API
         #endregion
 
         #region Instrument Queries
-        public async Task<List<Instrument>> SearchForIntruments(string query)
+        public Task<List<Instrument>> SearchForIntruments(string query)
         {
             throw new NotImplementedException();
             //HttpResponseMessage response = await client.GetAsync($"/next/2/instruments?query={query}");
@@ -315,9 +315,9 @@ namespace TrollCode.Nordnet.API
         public async Task<List<Instrument>> GetLeveragesForInstrument(long instrumentId, DateTime? expirationDate = null, long issuerId = 0, char? marketView = null, string instrumentType = null, string instrumentGroupType = null, string currency = null)
         {
             //TODO: Check out market view, this can be a enum instead of char D or U. (See docs)
-            List<Tuple<string,string>> queryParameters = new List<Tuple<string, string>>();
+            List<Tuple<string, string>> queryParameters = new List<Tuple<string, string>>();
 
-            if(expirationDate.HasValue)
+            if (expirationDate.HasValue)
             {
                 //Format: 2014-07-08
                 queryParameters.Add(new Tuple<string, string>("expiration_date", expirationDate.Value.ToString("yyyy-MM-dd")));
@@ -396,7 +396,7 @@ namespace TrollCode.Nordnet.API
         /// <returns>A list of call/put option pairs</returns>
         public async Task<List<OptionPair>> GetOptionPairsForInstrument(long instrumentId, DateTime? expirationDate = null)
         {
-            return await GetData<List<OptionPair>>($"/next/2/instruments/{instrumentId}/option_pairs{(expirationDate.HasValue ? "?expiration_date="+ expirationDate.Value.ToString("yyyy-MM-dd") : string.Empty)}");
+            return await GetData<List<OptionPair>>($"/next/2/instruments/{instrumentId}/option_pairs{(expirationDate.HasValue ? "?expiration_date=" + expirationDate.Value.ToString("yyyy-MM-dd") : string.Empty)}");
         }
 
         /// <summary>
@@ -434,7 +434,7 @@ namespace TrollCode.Nordnet.API
         /// <returns>A instrument or null if nothing was found</returns>
         public async Task<Instrument> LookupUpInstrumentByISIN(string isin, string currency, long marketId)
         {
-            if(string.IsNullOrWhiteSpace(isin) || string.IsNullOrWhiteSpace(currency) || marketId <= 0)
+            if (string.IsNullOrWhiteSpace(isin) || string.IsNullOrWhiteSpace(currency) || marketId <= 0)
             {
                 throw new ArgumentException("All paramters have to contain a value");
             }
@@ -487,7 +487,7 @@ namespace TrollCode.Nordnet.API
         /// <returns></returns>
         public async Task<List<Instrument>> GetUnderlyingInstrumentsForLeverageDerivative(string currency)
         {
-            if(string.IsNullOrWhiteSpace(currency))
+            if (string.IsNullOrWhiteSpace(currency))
             {
                 throw new ArgumentException("A currency is needed");
             }
@@ -575,7 +575,7 @@ namespace TrollCode.Nordnet.API
             }
             if (limit > 0)
             {
-                if(limit > 100)
+                if (limit > 100)
                 {
                     throw new ArgumentException("Limit can not be larger than the max value of 100");
                 }
@@ -621,7 +621,7 @@ namespace TrollCode.Nordnet.API
         protected virtual void Dispose(bool disposing)
         {
             Console.WriteLine("Disposing Nordnet API");
-            if(disposing)
+            if (disposing)
             {
                 keepAliveTimer?.Dispose();
                 client?.Dispose();
