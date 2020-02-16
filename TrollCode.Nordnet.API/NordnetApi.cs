@@ -617,6 +617,78 @@ namespace Trollcode.Nordnet.API
 
         #endregion
 
+        #region Tick Sizes
+        public async Task<List<TicksizeTable>> GetAllTicksizeTables()
+        {
+            return await GetData<List<TicksizeTable>>("/next/2/tick_sizes");
+        }
+
+        public async Task<Instrument> GetTicksizeTable(long tableId)
+        {
+            return await GetData<Instrument>($"/next/2/tick_sizes/{tableId}");
+        }
+        #endregion
+
+        #region Trades
+        public Task<List<TradingInformation>> GetTradingInformationForTradable(Tradable tradable)
+        {
+            return GetTradingInformationForTradables(new List<Tradable> { tradable });
+        }
+
+        public async Task<List<TradingInformation>> GetTradingInformationForTradables(List<Tradable> tradables)
+        {
+            return await GetData<List<TradingInformation>>($"/next/2/tradables/info/{HttpUtility.UrlEncode(string.Join(",", tradables.Select(x => x.Market_id + ":" + x.Identifier)))}");
+        }
+
+        /// <summary>
+        /// Can be used for populating instrument price graphs for today. Resolution is one minute
+        /// </summary>
+        /// <param name="tradable"></param>
+        /// <returns></returns>
+        public Task<List<IntradayTrades>> GetIntradayTradesForTradable(Tradable tradable)
+        {
+            return GetIntradayTradesForTradables(new List<Tradable> { tradable });
+        }
+
+        /// <summary>
+        /// Can be used for populating instrument price graphs for today. Resolution is one minute
+        /// </summary>
+        /// <param name="tradables"></param>
+        /// <returns></returns>
+        public async Task<List<IntradayTrades>> GetIntradayTradesForTradables(List<Tradable> tradables)
+        {
+            return await GetData<List<IntradayTrades>>($"/next/2/tradables/intraday/{HttpUtility.UrlEncode(string.Join(",", tradables.Select(x => x.Market_id + ":" + x.Identifier)))}");
+        }
+
+        /// <summary>
+        /// Get all public trades (all trades done on the marketplace) beloning to one ore more tradable.
+        /// </summary>
+        /// <param name="tradable"></param>
+        /// <param name="count">Count of 0 equals all trades</param>
+        /// <returns></returns>
+        public Task<List<PublicTrade>> GetAllPublicTradesForTradable(Tradable tradable, long count = 5)
+        {
+            return GetAllPublicTradesForTradables(new List<Tradable> { tradable }, count);
+        }
+
+        /// <summary>
+        /// Get all public trades (all trades done on the marketplace) beloning to one ore more tradable.
+        /// </summary>
+        /// <param name="tradables"></param>
+        /// <param name="count">Count of 0 equals all trades</param>
+        /// <returns></returns>
+        public async Task<List<PublicTrade>> GetAllPublicTradesForTradables(List<Tradable> tradables, long count = 5)
+        {
+            string tmpCount = count.ToString();
+            if(count == 0)
+            {
+                tmpCount = "all";
+            }
+
+            return await GetData<List<PublicTrade>>($"/next/2/tradables/trades/{HttpUtility.UrlEncode(string.Join(",", tradables.Select(x => x.Market_id + ":" + x.Identifier)))}?count={tmpCount}");
+        }
+        #endregion
+
         public void Dispose()
         {
             Dispose(true);
