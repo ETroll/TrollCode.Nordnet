@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using TrollCode.Nordnet.API;
-using TrollCode.Nordnet.API.Responses;
+using Trollcode.Nordnet.API;
+using Trollcode.Nordnet.API.Responses;
 
-namespace TrollCode.Nordnet.DemoApp
+namespace Trollcode.Nordnet.DemoApp
 {
     class Program
     {
@@ -88,6 +88,8 @@ namespace TrollCode.Nordnet.DemoApp
                     
                     List<IntrumentList> lists = await nordnet.GetIntrumentLists();
 
+                    var accesses = await nordnet.GetMarketRealtimeAccessList();
+
                     // Mid cap oslo list:  16384830  16314769
                     // Large cap Oslo: 16384829
                     // Small cap Oslo: 16384831
@@ -114,7 +116,7 @@ namespace TrollCode.Nordnet.DemoApp
 
 
 
-                    var news = await nordnet.GetNews();
+                    //var news = await nordnet.GetNews();
 
 
 
@@ -124,10 +126,10 @@ namespace TrollCode.Nordnet.DemoApp
 
 
                     //var status = await nordnet.GetSystemStatus();
-                    var accounts = await nordnet.GetAccounts();
+                    //var accounts = await nordnet.GetAccounts();
                     //var accountinfo = await nordnet.GetAccountInfo(accounts[0].Accno);
                     //var ledgerinfo = await nordnet.GetLedgerInformationForAccount(accounts[0].Accno);
-                    var orders = await nordnet.GetOrdersForAccount(accounts[0].Accno);
+                    //var orders = await nordnet.GetOrdersForAccount(accounts[0].Accno);
                     //var orderresult = await nordnet.PostOrder(accounts[0].Accno, new SendOrder());
 
 

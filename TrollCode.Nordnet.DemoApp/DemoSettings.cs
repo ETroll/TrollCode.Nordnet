@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TrollCode.Nordnet.DemoApp
+namespace Trollcode.Nordnet.DemoApp
 {
     public class DemoSettings
     {

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using TrollCode.Nordnet.API.Responses;
+using Trollcode.Nordnet.API.Responses;
 
-namespace TrollCode.Nordnet.API
+namespace Trollcode.Nordnet.API
 {
     public class NordnetSession
     {

@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using TrollCode.Nordnet.API.Responses;
+using Trollcode.Nordnet.API.Responses;
 using System.Net.Sockets;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Authentication;
-using TrollCode.Nordnet.API.FeedModels;
+using Trollcode.Nordnet.API.FeedModels;
 using Newtonsoft.Json;
 
-namespace TrollCode.Nordnet.API
+namespace Trollcode.Nordnet.API
 {
     public abstract class NordnetFeed : IObservable<FeedResponse>, IDisposable
     {

@@ -7,14 +7,14 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using TrollCode.Nordnet.API.Responses;
+using Trollcode.Nordnet.API.Responses;
 
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Linq;
 using System.Web;
 
-namespace TrollCode.Nordnet.API
+namespace Trollcode.Nordnet.API
 {
     public class NordnetApi : IDisposable
     {
@@ -539,6 +539,11 @@ namespace TrollCode.Nordnet.API
         public async Task<List<Market>> GetMarkets(long[] marketIds)
         {
             return await GetData<List<Market>>($"/next/2/markets/{HttpUtility.UrlEncode(string.Join(",", marketIds.Select(x => x.ToString())))}");
+        }
+
+        public async Task<List<RealtimeAccess>> GetMarketRealtimeAccessList()
+        {
+            return await GetData<List<RealtimeAccess>>("/next/2/realtime_access");
         }
 
         #endregion

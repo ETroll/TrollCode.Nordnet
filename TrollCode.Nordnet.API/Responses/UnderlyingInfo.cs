@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TrollCode.Nordnet.API.Responses
+namespace Trollcode.Nordnet.API.Responses
 {
     /*
         UnderlyingInfo {

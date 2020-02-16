@@ -11,8 +11,9 @@
     <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.3.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.2.0" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\TrollCode.Nordnet.API\TrollCode.Nordnet.API.csproj" />
+    <ProjectReference Include="..\Trollcode.Nordnet.API\Trollcode.Nordnet.API.csproj" />
   </ItemGroup>
 
 </Project>

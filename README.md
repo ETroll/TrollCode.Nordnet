@@ -1,4 +1,4 @@
-# TrollCode.Nordnet
+# Trollcode.Nordnet
 
 A C# library for Nordnet API and its feeds. Nordnet is a large online investment broker that is very popular in Scandinavia. 
 

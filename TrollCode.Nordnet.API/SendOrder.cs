@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TrollCode.Nordnet.API
+namespace Trollcode.Nordnet.API
 {
     public class SendOrder
     {

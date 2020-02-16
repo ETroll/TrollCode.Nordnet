@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TrollCode.Nordnet.API.FeedModels
+namespace Trollcode.Nordnet.API.FeedModels
 {
     public class Command
     {
