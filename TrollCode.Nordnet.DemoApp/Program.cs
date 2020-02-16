@@ -37,7 +37,7 @@ namespace Trollcode.Nordnet.DemoApp
             string username = user;
             string password = pass;
 
-            if(string.IsNullOrWhiteSpace(username) && string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(username) && string.IsNullOrWhiteSpace(password))
             {
                 AzureServiceTokenProvider azureServiceTokenProvider = new AzureServiceTokenProvider();
 
@@ -52,7 +52,7 @@ namespace Trollcode.Nordnet.DemoApp
                     string usernameUri = configuration.GetSection("DemoSettings:NordnetUsername").Value;
                     string passwordUri = configuration.GetSection("DemoSettings:NordnetPassword").Value;
 
-                    if(string.IsNullOrWhiteSpace(usernameUri) || string.IsNullOrWhiteSpace(passwordUri))
+                    if (string.IsNullOrWhiteSpace(usernameUri) || string.IsNullOrWhiteSpace(passwordUri))
                     {
                         throw new Exception("Could find any KeyVault URI's in config. Please add DemoSettings:NordnetUsername and DemoSettings:NordnetPassword to appsetting.json");
                     }
@@ -63,7 +63,7 @@ namespace Trollcode.Nordnet.DemoApp
                     username = (await keyVaultClient.GetSecretAsync(usernameUri)).Value;
                     password = (await keyVaultClient.GetSecretAsync(passwordUri)).Value;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine($"Exception while getting credentials from KeyVault: {ex.Message}");
                 }
@@ -85,7 +85,7 @@ namespace Trollcode.Nordnet.DemoApp
                 {
                     //If no exception was thrown. We are logged in and have a valid session
                     nordnet.OnSessionDisconnected += Nordnet_OnSessionDisconnected;
-                    
+
                     List<IntrumentList> lists = await nordnet.GetIntrumentLists();
 
                     var accesses = await nordnet.GetMarketRealtimeAccessList();
