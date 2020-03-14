@@ -73,7 +73,7 @@ namespace Trollcode.Nordnet.DemoApp
                                 "https://api.test.nordnet.se"
                             );
 
-            await api.Login(username, password);
+            await api.LoginAsync(username, password);
             return api;
         }
 

@@ -55,7 +55,14 @@ namespace Trollcode.Nordnet.API
             return provider;
         }
 
-        public async Task Login(string username, string password)
+        /// <summary>
+        /// Logs in to a Nordnet Session and returns a NordnetSession object with feeds, environment and sessionid.
+        /// Throws Exception if login is not successfull
+        /// </summary>
+        /// <param name="username">Username</param>
+        /// <param name="password">Password</param>
+        /// <returns>Nordnet Session object with session values</returns>
+        public async Task<NordnetSession> LoginAsync(string username, string password)
         {
             string timestamp = Math.Round((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalMilliseconds)
                 .ToString();
@@ -96,6 +103,8 @@ namespace Trollcode.Nordnet.API
 
                         long interval = (session.Expires_in - 30) * 1000;
                         keepAliveTimer = new Timer(KeepAliveTick, null, interval, interval);
+
+                        return CurrentSession;
                     }
                     catch (Exception)
                     {
