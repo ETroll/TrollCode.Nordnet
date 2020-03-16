@@ -76,6 +76,7 @@
             this.lvPrivateFeed = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colHeaderType1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -93,14 +94,13 @@
             // 
             // menuStrip1
             // 
-            this.menuStrip1.GripMargin = new System.Windows.Forms.Padding(2, 2, 0, 2);
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.optionsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1749, 36);
+            this.menuStrip1.Size = new System.Drawing.Size(1749, 33);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -109,7 +109,7 @@
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(54, 30);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(54, 29);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // exitToolStripMenuItem
@@ -124,7 +124,7 @@
             this.nordnetSettingsToolStripMenuItem,
             this.personalSettingsToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(92, 30);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(92, 29);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
             // nordnetSettingsToolStripMenuItem
@@ -163,7 +163,7 @@
             // 
             this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(1749, 4);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.toolStripContainer1.Location = new System.Drawing.Point(0, 36);
+            this.toolStripContainer1.Location = new System.Drawing.Point(0, 33);
             this.toolStripContainer1.Name = "toolStripContainer1";
             this.toolStripContainer1.Size = new System.Drawing.Size(1749, 37);
             this.toolStripContainer1.TabIndex = 3;
@@ -227,12 +227,12 @@
             this.tableLayoutPanel1.Controls.Add(this.tabCtrlApi, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.tabCtrlFeeds, 1, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 73);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 70);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1749, 892);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1749, 895);
             this.tableLayoutPanel1.TabIndex = 4;
             // 
             // tabCtrlApi
@@ -246,7 +246,7 @@
             this.tabCtrlApi.Location = new System.Drawing.Point(3, 3);
             this.tabCtrlApi.Name = "tabCtrlApi";
             this.tabCtrlApi.SelectedIndex = 0;
-            this.tabCtrlApi.Size = new System.Drawing.Size(1147, 886);
+            this.tabCtrlApi.Size = new System.Drawing.Size(1147, 889);
             this.tabCtrlApi.TabIndex = 1;
             // 
             // tabPageAccount
@@ -258,7 +258,7 @@
             this.tabPageAccount.Location = new System.Drawing.Point(4, 29);
             this.tabPageAccount.Name = "tabPageAccount";
             this.tabPageAccount.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageAccount.Size = new System.Drawing.Size(1139, 853);
+            this.tabPageAccount.Size = new System.Drawing.Size(1139, 856);
             this.tabPageAccount.TabIndex = 0;
             this.tabPageAccount.Text = "Account";
             // 
@@ -470,7 +470,7 @@
             this.tabCtrlFeeds.Location = new System.Drawing.Point(1156, 3);
             this.tabCtrlFeeds.Name = "tabCtrlFeeds";
             this.tabCtrlFeeds.SelectedIndex = 0;
-            this.tabCtrlFeeds.Size = new System.Drawing.Size(590, 886);
+            this.tabCtrlFeeds.Size = new System.Drawing.Size(590, 889);
             this.tabCtrlFeeds.TabIndex = 2;
             // 
             // tabPagePublicFeed
@@ -479,7 +479,7 @@
             this.tabPagePublicFeed.Location = new System.Drawing.Point(4, 29);
             this.tabPagePublicFeed.Name = "tabPagePublicFeed";
             this.tabPagePublicFeed.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPagePublicFeed.Size = new System.Drawing.Size(582, 853);
+            this.tabPagePublicFeed.Size = new System.Drawing.Size(582, 856);
             this.tabPagePublicFeed.TabIndex = 0;
             this.tabPagePublicFeed.Text = "Public Feed";
             this.tabPagePublicFeed.UseVisualStyleBackColor = true;
@@ -488,13 +488,14 @@
             // 
             this.lvPublicFeed.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colHeaderTimestamp1,
+            this.colHeaderType1,
             this.colHeaderData1});
             this.lvPublicFeed.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lvPublicFeed.HideSelection = false;
             this.lvPublicFeed.Location = new System.Drawing.Point(3, 3);
             this.lvPublicFeed.MultiSelect = false;
             this.lvPublicFeed.Name = "lvPublicFeed";
-            this.lvPublicFeed.Size = new System.Drawing.Size(576, 847);
+            this.lvPublicFeed.Size = new System.Drawing.Size(576, 850);
             this.lvPublicFeed.TabIndex = 0;
             this.lvPublicFeed.UseCompatibleStateImageBehavior = false;
             this.lvPublicFeed.View = System.Windows.Forms.View.Details;
@@ -507,7 +508,7 @@
             // colHeaderData1
             // 
             this.colHeaderData1.Text = "Data";
-            this.colHeaderData1.Width = 423;
+            this.colHeaderData1.Width = 324;
             // 
             // tabPagePrivateFeed
             // 
@@ -515,7 +516,7 @@
             this.tabPagePrivateFeed.Location = new System.Drawing.Point(4, 29);
             this.tabPagePrivateFeed.Name = "tabPagePrivateFeed";
             this.tabPagePrivateFeed.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPagePrivateFeed.Size = new System.Drawing.Size(582, 853);
+            this.tabPagePrivateFeed.Size = new System.Drawing.Size(582, 856);
             this.tabPagePrivateFeed.TabIndex = 1;
             this.tabPagePrivateFeed.Text = "Private Feed";
             this.tabPagePrivateFeed.UseVisualStyleBackColor = true;
@@ -529,7 +530,7 @@
             this.lvPrivateFeed.HideSelection = false;
             this.lvPrivateFeed.Location = new System.Drawing.Point(3, 3);
             this.lvPrivateFeed.Name = "lvPrivateFeed";
-            this.lvPrivateFeed.Size = new System.Drawing.Size(576, 847);
+            this.lvPrivateFeed.Size = new System.Drawing.Size(576, 850);
             this.lvPrivateFeed.TabIndex = 0;
             this.lvPrivateFeed.UseCompatibleStateImageBehavior = false;
             this.lvPrivateFeed.View = System.Windows.Forms.View.Details;
@@ -543,6 +544,11 @@
             // 
             this.columnHeader2.Text = "Data";
             this.columnHeader2.Width = 406;
+            // 
+            // colHeaderType1
+            // 
+            this.colHeaderType1.Text = "Type";
+            this.colHeaderType1.Width = 93;
             // 
             // MainForm
             // 
@@ -632,6 +638,7 @@
         private System.Windows.Forms.Label lblAccountTradeAvail;
         private System.Windows.Forms.Label lblTxtCurrency3;
         private System.Windows.Forms.Label lblTxtCurrency2;
+        private System.Windows.Forms.ColumnHeader colHeaderType1;
     }
 }
 

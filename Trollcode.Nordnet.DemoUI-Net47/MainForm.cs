@@ -9,11 +9,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Trollcode.Nordnet.API;
+using Trollcode.Nordnet.API.FeedModels;
 using Trollcode.Nordnet.API.Responses;
 
 namespace Trollcode.Nordnet.DemoUI_Net47
 {
-    public partial class MainForm : Form
+    public partial class MainForm : Form, IObserver<FeedResponse>
     {
         // The public key for NEXTAPI from the XML file
         static readonly string PUBLIC_KEY =
@@ -28,8 +29,13 @@ namespace Trollcode.Nordnet.DemoUI_Net47
           "</RSAParameters>";
 
         private NordnetApi api = null;
+        private PublicFeed publicFeed = null;
+        private PrivateFeed privateFeed = null;
         private NordnetSession session = null;
         private readonly CredentialsHelper credentials = new CredentialsHelper();
+
+        //tmp;
+        IDisposable unsubscriber;
 
         public MainForm()
         {
@@ -76,6 +82,12 @@ namespace Trollcode.Nordnet.DemoUI_Net47
                         Name = $"{x.Accno}-{x.Alias} ({x.Type})",
                         Value = x
                     }).ToArray());
+
+                    publicFeed = new PublicFeed(session.PrivateFeed.Hostname, (int)session.PrivateFeed.Port, session.SessionId);
+
+                    unsubscriber = publicFeed.Subscribe(this);
+
+                    publicFeed.Connect();
                 }
                 else
                 {
@@ -107,6 +119,36 @@ namespace Trollcode.Nordnet.DemoUI_Net47
 
 
 
+        }
+
+        delegate void OnNextCallback(FeedResponse value);
+        public void OnNext(FeedResponse value)
+        {
+            if(lvPublicFeed.InvokeRequired)
+            {
+                OnNextCallback d = new OnNextCallback(OnNext);
+                Invoke(d, new object[] { value });
+            }
+            else
+            {
+                List<string> data = new List<string>();
+                data.Add(DateTime.Now.ToShortTimeString());
+                data.Add(value.Type);
+                data.AddRange(value.Data.Select(x => $"{x.Key}: {x.Value} ").ToList());
+
+
+                lvPublicFeed.Items.Add(new ListViewItem(data.ToArray()));
+            }
+        }
+
+        public void OnError(Exception error)
+        {
+            MessageBox.Show(error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        public void OnCompleted()
+        {
+            throw new NotImplementedException();
         }
     }
 }

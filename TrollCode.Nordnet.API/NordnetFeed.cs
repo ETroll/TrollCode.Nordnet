@@ -8,115 +8,146 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Authentication;
 using Trollcode.Nordnet.API.FeedModels;
 using Newtonsoft.Json;
+using System.Threading;
+using System.Collections.Concurrent;
 
 namespace Trollcode.Nordnet.API
 {
     public abstract class NordnetFeed : IObservable<FeedResponse>, IDisposable
     {
-        private readonly List<IObserver<FeedResponse>> observers;
+        /// <summary>
+        /// When the SSL Socket has successfully connected
+        /// </summary>
+        public event EventHandler OnConnected;
 
-        public NordnetFeed()
+        /// <summary>
+        /// When the SSL Socket has disconnected
+        /// </summary>
+        public event EventHandler OnDisconnected;
+
+        private readonly List<IObserver<FeedResponse>> observers = new List<IObserver<FeedResponse>>();
+        private readonly ConcurrentQueue<Command> commandQueue = new ConcurrentQueue<Command>();
+
+        private TcpClient tcpClient;
+        private SslStream sslStream;
+
+        private Thread txThread;
+        private Thread rxThread;
+
+        private bool hostClosedConnection = false;
+
+        /// <summary>
+        /// Change the default command waiting time before connecting
+        /// </summary>
+        public int CommandWaitTime { get; set; } = 100;
+
+        public void SendGenericCommand(Command cmd)
         {
-            observers = new List<IObserver<FeedResponse>>();
+            commandQueue.Enqueue(cmd);
+            //sslStream.Write(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(new Command
+            //{
+            //    //{"market_id":14,"country":"DK","name":"Nasdaq OMX Copenhagen"},
+            //    cmd = "subscribe", //"args":{"t":"price", "i":"1869", "m":30}}
+            //    args = new Dictionary<string, string>
+            //    {
+            //        {"t", "price"},
+            //        {"i", "1869" },
+            //        {"m", "14"}
+            //    }
+            //}) + "\n"));
+            //sslStream.Flush();
         }
 
-        public void ConnectToFeed(FeedInformation information, string sessionid)
+        protected void ConnectToFeedAndStart(string hostname, int port, CancellationToken cancellationToken)
         {
-            using (TcpClient client = new TcpClient(information.Hostname, (int)information.Port))
+            txThread = new Thread(() =>
             {
-                Console.WriteLine("Client connected.");
-
-                //NOTE to self: Does leaveInnerStreamOpen means that the inner TcpClient gets closed when the SslStream closes?
-                using (SslStream sslStream = new SslStream(client.GetStream(), false, new RemoteCertificateValidationCallback((object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) =>
+                tcpClient = new TcpClient(hostname, port);
+                sslStream = new SslStream(tcpClient.GetStream(), false, new RemoteCertificateValidationCallback((object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) =>
                 {
                     //Dont validate for now. Add later!
                     return true;
+                }), null);
 
-                }), null))
+                try
                 {
-                    try
-                    {
-                        sslStream.AuthenticateAsClient("I Will Fail Now");
-                    }
-                    catch (AuthenticationException e)
-                    {
-                        Console.WriteLine("Exception: {0}", e.Message);
-                        if (e.InnerException != null)
-                        {
-                            Console.WriteLine("Inner exception: {0}", e.InnerException.Message);
-                        }
-                        Console.WriteLine("Authentication failed - closing the connection.");
-                        client.Close();
-                        return;
-                    }
-
-                    sslStream.Write(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(new Command
-                    {
-                        cmd = "login",
-                        args = new Dictionary<string, string>
-                        {
-                            {"session_key", sessionid}
-                        }
-                    }) + "\n"));
-                    sslStream.Flush();
-
-                    sslStream.Write(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(new Command
-                    {
-                        //{"market_id":14,"country":"DK","name":"Nasdaq OMX Copenhagen"},
-                        cmd = "subscribe", //"args":{"t":"price", "i":"1869", "m":30}}
-                        args = new Dictionary<string, string>
-                        {
-                            {"t", "price"},
-                            {"i", "1869" },
-                            {"m", "14"}
-                        }
-                    }) + "\n"));
-                    sslStream.Flush();
-
-                    byte[] buffer = new byte[2048];
-                    StringBuilder messageData = new StringBuilder();
-                    int bytes = -1;
-                    do
-                    {
-                        bytes = sslStream.Read(buffer, 0, buffer.Length);
-
-                        Decoder decoder = Encoding.ASCII.GetDecoder();
-                        char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
-                        decoder.GetChars(buffer, 0, bytes, chars, 0);
-
-                        Console.WriteLine($"{DateTime.UtcNow.ToString("mm:ss")}: Got {bytes} bytes - {new string(chars)}");
-
-                        try
-                        {
-                            FeedResponse response = JsonConvert.DeserializeObject<FeedResponse>(new string(chars));
-
-
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("Could not parse feed response");
-                            Console.WriteLine(ex.Message);
-                        }
-                    } while (bytes != 0);
-
-                    Console.WriteLine($"The server has disconnected - Stopping");
+                    sslStream.AuthenticateAsClient("I Will Fail Now");
                 }
-            }
+                catch (AuthenticationException e)
+                {
+                    tcpClient.Close();
+                    throw e;
+                }
+                OnConnected?.Invoke(this, new EventArgs());
+
+                rxThread = new Thread(StartRead);
+                rxThread.Start(cancellationToken);
+
+                while (!cancellationToken.IsCancellationRequested && !hostClosedConnection)
+                {
+                    while (commandQueue.IsEmpty)
+                    {
+                        Thread.Sleep(CommandWaitTime);
+                    }
+
+                    if (commandQueue.TryDequeue(out Command cmd))
+                    {
+                        sslStream.Write(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(cmd) + "\n"));
+                        sslStream.Flush();
+                    }   
+                }
+                //Clean up!!
+                tcpClient.Close();
+                foreach (var observer in observers)
+                {
+                    observer.OnCompleted();
+                }
+                OnDisconnected?.Invoke(this, new EventArgs());
+            });
+            txThread.Start();
         }
 
-        private void Notify(FeedResponse message)
+        private void StartRead(object token)
         {
-            foreach (var observer in observers)
+            CancellationToken cancellationToken = (CancellationToken)token;
+
+            byte[] buffer = new byte[2048];
+            int bytes;
+            do
             {
-                if(message == null)
+                bytes = sslStream.Read(buffer, 0, buffer.Length);
+
+                //Decoder decoder = Encoding.ASCII.GetDecoder();
+                //char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
+                //decoder.GetChars(buffer, 0, bytes, chars, 0);
+
+                //Console.WriteLine($"{DateTime.UtcNow.ToString("mm:ss")}: Got {bytes} bytes - {new string(chars)}");
+
+                try
                 {
-                    //TODO: Create own exception?
-                    observer.OnError(new Exception("Null message was recieved"));
+                    string data = Encoding.ASCII.GetString(buffer);
+                    FeedResponse response = JsonConvert.DeserializeObject<FeedResponse>(data); //new string(chars));
+
+                    if (response == null) throw new Exception("Null message was recieved");
+                    
+                    foreach (var observer in observers)
+                    {
+                        observer.OnNext(response);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    observer.OnNext(message);
-                } 
+                    foreach (var observer in observers)
+                    {
+                        observer.OnError(ex);
+                    }
+                }
+            } while (bytes != 0 && !cancellationToken.IsCancellationRequested);
+
+            if(bytes == 0)
+            {
+                //The server closed the connection
+                hostClosedConnection = true;
             }
         }
 
