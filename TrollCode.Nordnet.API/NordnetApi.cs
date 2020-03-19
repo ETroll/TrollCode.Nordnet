@@ -274,7 +274,7 @@ namespace Trollcode.Nordnet.API
         #endregion
 
         #region Indicator Queries
-        public async Task<List<Indicator>> GetIndicators()
+        public async Task<List<Indicator>> GetAllIndicators()
         {
             return await GetData<List<Indicator>>("/next/2/indicators");
         }
@@ -299,7 +299,7 @@ namespace Trollcode.Nordnet.API
         #endregion
 
         #region Instrument Queries
-        public Task<List<Instrument>> SearchForIntruments(string query)
+        public Task<List<Instrument>> SearchForInstruments(string query)
         {
             throw new NotImplementedException();
             //HttpResponseMessage response = await client.GetAsync($"/next/2/instruments?query={query}");
@@ -522,9 +522,9 @@ namespace Trollcode.Nordnet.API
         #endregion
 
         #region Instrument List Queries
-        public async Task<List<IntrumentList>> GetIntrumentLists()
+        public async Task<List<InstrumentList>> GetInstrumentLists()
         {
-            return await GetData<List<IntrumentList>>("/next/2/lists");
+            return await GetData<List<InstrumentList>>("/next/2/lists");
         }
 
         public async Task<List<Instrument>> GetInstrumentsInList(long listId)

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Trollcode.Nordnet.API.Responses
 {
-    public class IntrumentList
+    public class InstrumentList
     {
         //List {
         //    symbol(string): The short name of the symbol.,

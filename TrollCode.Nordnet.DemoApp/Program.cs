@@ -86,7 +86,7 @@ namespace Trollcode.Nordnet.DemoApp
                     //If no exception was thrown. We are logged in and have a valid session
                     nordnet.OnSessionDisconnected += Nordnet_OnSessionDisconnected;
 
-                    List<IntrumentList> lists = await nordnet.GetIntrumentLists();
+                    List<InstrumentList> lists = await nordnet.GetInstrumentLists();
 
                     var accesses = await nordnet.GetMarketRealtimeAccessList();
 

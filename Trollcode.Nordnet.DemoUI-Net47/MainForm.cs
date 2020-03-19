@@ -14,7 +14,7 @@ using Trollcode.Nordnet.API.Responses;
 
 namespace Trollcode.Nordnet.DemoUI_Net47
 {
-    public partial class MainForm : Form, IObserver<FeedResponse>
+    public partial class MainForm : Form, IObserver<FeedResponseEnvelope>
     {
         // The public key for NEXTAPI from the XML file
         static readonly string PUBLIC_KEY =
@@ -83,11 +83,11 @@ namespace Trollcode.Nordnet.DemoUI_Net47
                         Value = x
                     }).ToArray());
 
-                    publicFeed = new PublicFeed(session.PrivateFeed.Hostname, (int)session.PrivateFeed.Port, session.SessionId);
+                    //publicFeed = new PublicFeed(session.PrivateFeed.Hostname, (int)session.PrivateFeed.Port, session.SessionId);
 
-                    unsubscriber = publicFeed.Subscribe(this);
+                    //unsubscriber = publicFeed.Subscribe(this);
 
-                    publicFeed.Connect();
+                    //publicFeed.Connect();
                 }
                 else
                 {
@@ -121,8 +121,8 @@ namespace Trollcode.Nordnet.DemoUI_Net47
 
         }
 
-        delegate void OnNextCallback(FeedResponse value);
-        public void OnNext(FeedResponse value)
+        delegate void OnNextCallback(FeedResponseEnvelope value);
+        public void OnNext(FeedResponseEnvelope value)
         {
             if(lvPublicFeed.InvokeRequired)
             {
@@ -149,6 +149,65 @@ namespace Trollcode.Nordnet.DemoUI_Net47
         public void OnCompleted()
         {
             throw new NotImplementedException();
+        }
+
+        private async void tabCtrlApi_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if(tabCtrlApi.SelectedTab.Text == "Indicators")
+            {
+                if(lvIndicators.Items.Count == 0)
+                {
+                    List<Indicator> indicators = await api.GetAllIndicators();
+
+                    lvIndicators.Items.AddRange(indicators.Select(x => new ListViewItem(new string[]
+                    {
+                        x.Name,
+                        x.Src,
+                        x.Identifier,
+                        x.Open,
+                        x.Close,
+                        x.Country,
+                        x.Type.ToString(),
+                        x.Instrument_id?.ToString() ?? ""
+                    })).ToArray());
+                }
+            }
+            else if(tabCtrlApi.SelectedTab.Text == "Instruments")
+            {
+                if (cbLists.Items.Count == 0)
+                {
+                    cbLists.DisplayMember = "Name";
+
+                    cbLists.Items.AddRange((await api.GetInstrumentLists()).ToArray());
+                }
+            }
+        }
+
+        private async void cbLists_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            long selectedValue = (cbLists.Items[cbLists.SelectedIndex] as InstrumentList)?.List_id ?? 0;
+            var instruments = await api.GetInstrumentsInList(selectedValue);
+
+            lvInstruments.Items.Clear();
+
+            if(instruments != null)
+            {
+                lvInstruments.Items.AddRange(instruments
+                    .Select(x => new ListViewItem(new string[]
+                    {
+                        x.Instrument_id.ToString(),
+                        x.Name,
+                        x.Currency,
+                        x.Instrument_type,
+                        x.Symbol,
+                        x.Isin_code,
+                        x.Sector,
+                        x.Sector_group,
+                        x.Tradables?.Count.ToString(),
+                        x.Underlyings?.Count.ToString()
+                    })).ToArray());
+            }
+
         }
     }
 }

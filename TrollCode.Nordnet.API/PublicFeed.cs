@@ -8,35 +8,66 @@ namespace Trollcode.Nordnet.API
 {
     public class PublicFeed : NordnetFeed
     {
-        private readonly string hostname;
-        private readonly int port;
-        private readonly string sessionid;
-
-        private readonly CancellationTokenSource cts = new CancellationTokenSource();
-
-        public PublicFeed(string hostname, int port, string sessionid)
+        public void StartSubscriptionToPriceFeed()
         {
-            this.hostname = hostname;
-            this.port = port;
-            this.sessionid = sessionid;
-        }
-
-        public void Connect()
-        {
-            ConnectToFeedAndStart(hostname, port, cts.Token);
             SendGenericCommand(new Command
             {
-                cmd = "login",
+                cmd = "subscribe",
                 args = new Dictionary<string, string>
                 {
-                    {"session_key", sessionid}
+                    { "t", "price" },
+                    { "i", "1869" },
+                    { "m", "30"}
                 }
             });
         }
+        public void StopSubscriptionToPriceFeed()
+        {
 
+        }
 
+        public void StartSubscriptionToOrderDepthFeed()
+        {
 
+        }
+        public void StopSubscriptionToOrderDepthFeed()
+        {
 
+        }
 
+        public void StartSubscriptionToTradeFeed()
+        {
+
+        }
+        public void StopSubscriptionToTradeFeed()
+        {
+
+        }
+        public void StartSubscriptionToIndicatorFeed()
+        {
+
+        }
+        public void StopSubscriptionToIndicatorFeed()
+        {
+
+        }
+
+        public void StartSubscriptionToNewsFeed()
+        {
+
+        }
+        public void StopSubscriptionToNewsFeed()
+        {
+
+        }
+
+        public void StartSubscriptionToTradingStatusFeed()
+        {
+
+        }
+        public void StopSubscriptionToTradingStatusFeed()
+        {
+
+        }
     }
 }

@@ -13,7 +13,7 @@ using System.Collections.Concurrent;
 
 namespace Trollcode.Nordnet.API
 {
-    public abstract class NordnetFeed : IObservable<FeedResponse>, IDisposable
+    public abstract class NordnetFeed : IObservable<FeedResponseEnvelope>, IDisposable
     {
         /// <summary>
         /// When the SSL Socket has successfully connected
@@ -25,8 +25,14 @@ namespace Trollcode.Nordnet.API
         /// </summary>
         public event EventHandler OnDisconnected;
 
-        private readonly List<IObserver<FeedResponse>> observers = new List<IObserver<FeedResponse>>();
+        /// <summary>
+        /// Change the default command waiting time before connecting
+        /// </summary>
+        public int CommandWaitTime { get; set; } = 100;
+
+        private readonly List<IObserver<FeedResponseEnvelope>> observers = new List<IObserver<FeedResponseEnvelope>>();
         private readonly ConcurrentQueue<Command> commandQueue = new ConcurrentQueue<Command>();
+        private readonly CancellationTokenSource cts = new CancellationTokenSource();
 
         private TcpClient tcpClient;
         private SslStream sslStream;
@@ -37,11 +43,49 @@ namespace Trollcode.Nordnet.API
         private bool hostClosedConnection = false;
 
         /// <summary>
-        /// Change the default command waiting time before connecting
+        /// Connect to a Nordnet Feed
         /// </summary>
-        public int CommandWaitTime { get; set; } = 100;
+        /// <param name="hostname">Hostname of the feed</param>
+        /// <param name="port">Port of the feed</param>
+        /// <param name="sessionid">The sessionid recieved from the REST login</param>
+        public void Connect(string hostname, int port, string sessionid)
+        {
+            ConnectToFeedAndStart(hostname, port, cts.Token);
+            SendGenericCommand(new Command
+            {
+                cmd = "login",
+                args = new Dictionary<string, string>
+                {
+                    {"session_key", sessionid}
+                }
+            });
+        }
 
-        public void SendGenericCommand(Command cmd)
+        /// <summary>
+        /// Observe the stream of responses from the feed.
+        /// </summary>
+        /// <param name="observer">The observer that implements the IObserver interface</param>
+        /// <returns>A disposable object that removes the observer from the feed when disposed</returns>
+        public IDisposable Subscribe(IObserver<FeedResponseEnvelope> observer)
+        {
+            if (!observers.Contains(observer))
+            {
+                observers.Add(observer);
+            }
+            return new FeedUnsubscriber(observers, observer);
+        }
+
+        /// <summary>
+        /// Dispose the feed and close all sockets
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            //Just in case an inherited class adds a finalizer
+            GC.SuppressFinalize(this);
+        }
+
+        protected void SendGenericCommand(Command cmd)
         {
             commandQueue.Enqueue(cmd);
             //sslStream.Write(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(new Command
@@ -116,23 +160,17 @@ namespace Trollcode.Nordnet.API
             do
             {
                 bytes = sslStream.Read(buffer, 0, buffer.Length);
-
-                //Decoder decoder = Encoding.ASCII.GetDecoder();
-                //char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
-                //decoder.GetChars(buffer, 0, bytes, chars, 0);
-
-                //Console.WriteLine($"{DateTime.UtcNow.ToString("mm:ss")}: Got {bytes} bytes - {new string(chars)}");
-
                 try
                 {
                     string data = Encoding.ASCII.GetString(buffer);
-                    FeedResponse response = JsonConvert.DeserializeObject<FeedResponse>(data); //new string(chars));
+                    FeedResponse response = JsonConvert.DeserializeObject<FeedResponse>(data);
 
                     if (response == null) throw new Exception("Null message was recieved");
-                    
+
+                    FeedResponseEnvelope envelope = CreateEnvelopeForResponse(response);
                     foreach (var observer in observers)
                     {
-                        observer.OnNext(response);
+                        observer.OnNext(envelope);
                     }
                 }
                 catch (Exception ex)
@@ -151,12 +189,11 @@ namespace Trollcode.Nordnet.API
             }
         }
 
-        public void Dispose()
+        private FeedResponseEnvelope CreateEnvelopeForResponse(FeedResponse resp)
         {
-            Dispose(true);
-            //Just in case an inherited class adds a finalizer
-            GC.SuppressFinalize(this);
+            return null;
         }
+
         protected virtual void Dispose(bool disposing)
         {
             foreach (var observer in observers)
@@ -167,23 +204,16 @@ namespace Trollcode.Nordnet.API
                 }
             }
             observers.Clear();
+            cts.Cancel();
         }
 
-        public IDisposable Subscribe(IObserver<FeedResponse> observer)
-        {
-            if (!observers.Contains(observer))
-            {
-                observers.Add(observer);
-            }
-            return new FeedUnsubscriber(observers, observer);
-        }
 
         private class FeedUnsubscriber : IDisposable
         {
-            private readonly List<IObserver<FeedResponse>> allObservers;
-            private readonly IObserver<FeedResponse> currentObserver;
+            private readonly List<IObserver<FeedResponseEnvelope>> allObservers;
+            private readonly IObserver<FeedResponseEnvelope> currentObserver;
 
-            public FeedUnsubscriber(List<IObserver<FeedResponse>> allObservers, IObserver<FeedResponse> currentObserver)
+            public FeedUnsubscriber(List<IObserver<FeedResponseEnvelope>> allObservers, IObserver<FeedResponseEnvelope> currentObserver)
             {
                 this.allObservers = allObservers;
                 this.currentObserver = currentObserver;
@@ -196,6 +226,13 @@ namespace Trollcode.Nordnet.API
                     allObservers.Remove(currentObserver);
                 }
             }
+        }
+
+        private class FeedResponse
+        {
+            //"price", "depth", "trade", "indicator", "news", "trading_status", "heartbeat"
+            public string Type { get; set; }
+            public Dictionary<string, string> Data { get; set; }
         }
     }
 }
